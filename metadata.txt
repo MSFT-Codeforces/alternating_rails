@@ -1,0 +1,9 @@
+# Metadata
+**Category:** - Coding
+**Topic:** - Competitive Programming
+**Subtopic:** - ["Searching Algorithms", "Divide and Conquer", "Dynamic Programming", "Algorithm Complexity and Big O Notation"]
+**Difficulty:** - Hard
+**Languages:** - Python
+**Number of Approaches:** - 4, ($O\left(\prod_{i=1}^n (\min(K, i)+1)\right)$ -> $O\left(n(X+Y)\right)$ -> $O(n\log n)$ -> $O(\log n)$)
+**Number of Chains:** - 7
+**Model-Breaking:** - False

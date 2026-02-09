@@ -1,0 +1,54 @@
+### Correction/verification of the earlier reasoning (no test cases yet)
+
+The core reduction used in the reasoning is **correct**, with one nuance worth stating more explicitly to avoid misinterpretation:
+
+#### Reachability along one axis is contiguous \([0, \text{capacity}]\)
+For a fixed set of ticks affecting one axis (odd ticks for \(X\), even ticks for \(Y\)), on each such tick you can add any integer in an interval \([0, c_j]\) where \(c_j=\min(K,i)\) for that tick’s global index \(i\). The sumset of integer intervals is itself an integer interval:
+\[
+[0,c_1] + [0,c_2] + \dots + [0,c_m] = [0, c_1+c_2+\dots+c_m].
+\]
+So after \(n\) total ticks:
+- the set of reachable \(X\) values is exactly all integers in \([0,\text{capX}(n)]\),
+- the set of reachable \(Y\) values is exactly all integers in \([0,\text{capY}(n)]\),
+
+where
+\[
+\text{capX}(n)=\sum_{\substack{i\le n\\ i\text{ odd}}}\min(K,i),\qquad
+\text{capY}(n)=\sum_{\substack{i\le n\\ i\text{ even}}}\min(K,i).
+\]
+Because odd/even ticks affect disjoint coordinates, choices for \(X\) and \(Y\) are independent, so \((X,Y)\) is reachable in \(n\) ticks **iff** \(\text{capX}(n)\ge X\) and \(\text{capY}(n)\ge Y\). This fully justifies focusing test design on parity counts and correct capacity computation.
+
+---
+
+## What test reasoning must cover (with factual clarifications)
+
+### 1) Input range boundaries
+- \((X,Y)=(0,0)\Rightarrow 0\) must be handled specially; otherwise some implementations return 1.
+- \(X=0\) or \(Y=0\): reaching a point on one axis may require many “wasted” ticks of the other parity (using \(d=0\)); solutions that assume “progress every tick” fail.
+- Extremes \(X,Y\approx 10^{18}\), \(K\) at extremes \(1\) and \(10^9\):
+  - With \(K=1\), growth is linear in the number of relevant ticks; the minimal \(n\) can be on the order of \(2\cdot 10^{18}\) (e.g., both coordinates huge).
+  - With very large \(K\) (or \(K\) larger than the needed \(n\)), \(\min(K,i)=i\) for all used ticks and capacities are quadratic in \(n\), pushing intermediate arithmetic large.
+
+### 2) Structural edge cases
+- **Parity/off-by-one**: odds are \(\lceil n/2\rceil\), evens are \(\lfloor n/2\rfloor\). Minimal \(n\) often flips when moving from even to odd; tests should force both outcomes.
+- **“Exactly at capacity” vs “just over”**: choose cases where \(X\) (or \(Y\)) equals \(\text{capX}(n)\) exactly, and cases where it is \(\text{capX}(n)+1\). This catches `>=` vs `>` and binary search termination mistakes.
+- **The breakpoint at tick index \(i=K\)** is global-tick based, not “odd-move number” based. Tests should include \(n\in\{K-1,K,K+1\}\) for both even/odd \(K\), because whether tick \(K\) contributes to \(X\) or \(Y\) depends on parity of \(K\).
+
+### 3) Stress / worst-case patterns
+- Large \(t\) (\(10^4\)) with mixed regimes catches any per-test simulation.
+- Worst-case \(n\) occurs with small \(K\) (especially \(K=1\)) and huge \(X,Y\), stressing:
+  - too-small binary search upper bounds,
+  - overflow in mid computation,
+  - failure to use \(O(\log n)\) per test.
+- Skewed targets (very large \(X\), tiny \(Y\), and vice versa) ensure the solution doesn’t implicitly assume balanced growth.
+
+### 4) Common implementation mistakes to target
+- **Overflow**: \(\text{capX}(n)\) and \(\text{capY}(n)\) can exceed \(10^{18}\) during computation; intermediate products like \(m(m+1)\), \(K\cdot m\), etc., can overflow 64-bit unless using 128-bit or saturating arithmetic.
+- **Wrong mapping between “tick number” and “move count”**: computing \(\sum_{j=1}^{\lceil n/2\rceil}\min(K, j)\) is wrong; it must be \(\min(K, 2j-1)\) for odds and \(\min(K,2j)\) for evens (i.e., based on the global tick index).
+- **Binary search upper bound**: a naive bound like \(2\cdot (X+Y)/K\) is not always safe because early ticks are limited by \(i\) (when \(i<K\)). A robust approach is exponential “doubling” of \(hi\) until feasible.
+- **Forcing movement each tick**: must allow \(d=0\) to “wait”; otherwise cases with one coordinate zero break.
+
+### 5) Invalid input
+Not applicable; the constraints define all inputs as valid.
+
+If you want, the next step is to turn the above into a compact suite of concrete test cases (with expected outputs) that specifically trigger each failure mode.

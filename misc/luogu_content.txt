@@ -1,0 +1,17 @@
+Problem Credits: Proof\_by\_QED
+
+Analysis: cry
+
+**Solution**
+
+Consider the x and y directions separately and calculate the jumps we need in each direction. The number of jumps we need in the x direction is ⌈xk⌉ and similarily ⌈yk⌉ in the y direction. Now let's try to combine them to obtain the total number of jumps. Let's consider the following cases:
+
+- ⌈yk⌉≥⌈xk⌉. In this case, there will need to be ⌈yk⌉−⌈xk⌉ extra jumps in the y direction. While Freya performs these extra jumps, she will choose d=0 for the x direction. In total, there will need to be 2⋅⌈yk⌉ jumps.
+
+- ⌈xk⌉>⌈yk⌉. We can use the same reasoning as the previous case, but there's a catch. Since Freya is initially facing the x direction, for the last jump, she does not need to jump in the y direction. In total, there will need to be 2⋅⌈xk⌉−1 jumps.
+
+**Code (Python) (ntarsis30)**
+
+```cpp
+#include<bits/stdc++.h>using namespace std;using ll=long long;using i128=__int128;using ull=unsigned long long;using ld=long double;using pii=pair<int,int>;using pll=pair<ll,ll>;clock_t a;const int M=998244353;const ll inf=1e17;const ld eps=1e-10;void oT(char c='.'){cout<<c<<"Time:"<<double(clock()-a)<<'\n';}struct Solution{		int n,x,y,k;vector<string>R;	void Init()	{		cin>>x>>y>>k;		x=(x+k-1)/k,y=(y+k-1)/k;		cout<<max(x*2-1,y*2)<<'\n';	}	void Solve()	{ 	}};void precal(){}signed main() {    ios::sync_with_stdio(0);cin.tie(0);precal();    int t=1;cin>>t;while(t--){Solution sol;sol.Init();sol.Solve();}}
+```

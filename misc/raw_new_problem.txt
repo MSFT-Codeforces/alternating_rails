@@ -1,0 +1,171 @@
+## Problem: Freya’s Warm‑Up Jumps
+
+Freya the Frog moves on the 2D coordinate plane. She starts at \((0,0)\) and wants to reach \((x,y)\).
+
+She makes moves \(1,2,3,\dots\).
+
+- On **odd-numbered** moves she faces the **positive \(x\)-axis**.
+- On **even-numbered** moves she faces the **positive \(y\)-axis**.
+
+### Warm-up rule
+On move \(i\), Freya chooses an integer jump length \(d\) such that
+\[
+0 \le d \le \min(k, i),
+\]
+and advances by \(d\) along the axis she is currently facing.
+
+Determine the **minimum number of moves** needed for Freya to land **exactly** at \((x,y)\).
+
+---
+
+### Input Format
+- The first line contains an integer \(t\) \((1 \le t \le 10^4)\), the number of test cases.
+- Each test case contains three integers \(x, y, k\) \((0 \le x,y \le 10^{18},\ 1 \le k \le 10^{9})\).
+
+### Output Format
+For each test case, output the minimum number of moves required.
+
+---
+
+## Editorial
+
+### 1) Separate the two axes
+Odd moves contribute only to \(x\), even moves contribute only to \(y\).  
+For a fixed total number of moves \(n\):
+
+- Number of odd moves (for \(x\)):
+\[
+m_x = \left\lceil \frac{n}{2} \right\rceil = \frac{n+1}{2}
+\]
+- Number of even moves (for \(y\)):
+\[
+m_y = \left\lfloor \frac{n}{2} \right\rfloor = \frac{n}{2}
+\]
+
+Define the maximum total distance Freya could add along each axis within \(n\) moves:
+\[
+C_x(n) = \sum_{\substack{1 \le i \le n \\ i\text{ odd}}} \min(k,i),\quad
+C_y(n) = \sum_{\substack{1 \le i \le n \\ i\text{ even}}} \min(k,i).
+\]
+
+### 2) Reachability on one axis is an interval
+For one axis, suppose you have several moves where on move \(j\) you can add any integer in \([0, c_j]\). Then the set of achievable sums is exactly all integers in:
+\[
+[0, \sum_j c_j].
+\]
+Reason: if after some moves all integers \([0,S]\) are achievable, then after adding a move allowing \([0,c]\), the achievable set becomes \([0,S+c]\) (for any target \(t\le S+c\), choose \(S\) if \(t>S\), else choose \(t\), and use the remainder in \([0,c]\)).
+
+Therefore, reaching \((x,y)\) in exactly \(n\) moves is possible **iff**
+\[
+C_x(n)\ge x \quad\text{and}\quad C_y(n)\ge y.
+\]
+The choices on odd and even moves are independent, so satisfying both is sufficient.
+
+### 3) Compute \(C_x(n)\) and \(C_y(n)\) in \(O(1)\)
+
+#### Odd moves (for \(x\))
+Odd indices are \(1,3,5,\dots,2m_x-1\).  
+Among these, those \(\le k\) are \(1,3,\dots\) up to \(k\). The count of odd numbers \(\le k\) is:
+\[
+\left\lfloor \frac{k+1}{2}\right\rfloor.
+\]
+Let
+\[
+p_x = \min\left(m_x,\ \left\lfloor \frac{k+1}{2}\right\rfloor\right).
+\]
+Then the first \(p_x\) odd moves have caps \(1,3,\dots,2p_x-1\) whose sum is \(p_x^2\). The remaining \(m_x-p_x\) odd moves each contribute cap \(k\). Thus:
+\[
+C_x(n) = p_x^2 + (m_x-p_x)\cdot k.
+\]
+
+#### Even moves (for \(y\))
+Even indices are \(2,4,6,\dots,2m_y\).  
+Those \(\le k\) correspond to \(2,4,\dots\) up to \(k\), whose count is:
+\[
+\left\lfloor \frac{k}{2}\right\rfloor.
+\]
+Let
+\[
+p_y = \min\left(m_y,\ \left\lfloor \frac{k}{2}\right\rfloor\right).
+\]
+Then the first \(p_y\) even moves have caps \(2,4,\dots,2p_y\) summing to \(p_y(p_y+1)\). The remaining \(m_y-p_y\) even moves each contribute cap \(k\). Thus:
+\[
+C_y(n) = p_y(p_y+1) + (m_y-p_y)\cdot k.
+\]
+
+### 4) Binary search the minimum \(n\)
+Both \(C_x(n)\) and \(C_y(n)\) are nondecreasing in \(n\), so feasibility is monotone. We can:
+1. Exponentially increase an upper bound \(hi\) until feasible.
+2. Binary search the smallest feasible \(n\) in \([0, hi]\).
+
+All computations must use 128-bit integers because capacities can be as large as \(\approx n\cdot k\).
+
+**Complexity:** \(O(\log n)\) per test case (at most about 62 iterations), fast for \(t\le 10^4\).
+
+---
+
+## C++17 Reference Implementation
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+using i128 = __int128_t;
+
+// Sum over odd i <= n of min(k, i)
+static inline i128 capX(long long n, long long k) {
+    long long mx = (n + 1) / 2;       // number of odd moves
+    long long warm = (k + 1) / 2;     // number of odd indices <= k
+    long long px = min(mx, warm);
+
+    // 1 + 3 + ... + (2*px - 1) = px^2
+    i128 res = (i128)px * (i128)px;
+    res += (i128)(mx - px) * (i128)k;
+    return res;
+}
+
+// Sum over even i <= n of min(k, i)
+static inline i128 capY(long long n, long long k) {
+    long long my = n / 2;             // number of even moves
+    long long warm = k / 2;           // number of even indices <= k
+    long long py = min(my, warm);
+
+    // 2 + 4 + ... + 2*py = py*(py+1)
+    i128 res = (i128)py * (i128)(py + 1);
+    res += (i128)(my - py) * (i128)k;
+    return res;
+}
+
+static inline bool feasible(long long n, long long x, long long y, long long k) {
+    return capX(n, k) >= (i128)x && capY(n, k) >= (i128)y;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+    while (t--) {
+        long long x, y, k;
+        cin >> x >> y >> k;
+
+        if (x == 0 && y == 0) {
+            cout << 0 << "\n";
+            continue;
+        }
+
+        long long lo = 0, hi = 1;
+        while (!feasible(hi, x, y, k)) hi <<= 1;
+
+        while (lo + 1 < hi) {
+            long long mid = lo + (hi - lo) / 2;
+            if (feasible(mid, x, y, k)) hi = mid;
+            else lo = mid;
+        }
+
+        cout << hi << "\n";
+    }
+    return 0;
+}
+```

@@ -1,0 +1,101 @@
+**Problem Statement**
+Freya the Frog is moving on the 2D coordinate plane. She starts at \((0,0)\) and wants to reach \((x,y)\).
+
+In one move, she chooses an integer \(d\) with \(0 \le d \le k\) and jumps forward by \(d\) units in the direction she is currently facing.
+
+- At the beginning, she faces the positive \(x\)-axis.
+- After every move, she alternates her facing direction between the positive \(x\)-axis and the positive \(y\)-axis:
+  - move 1: \(+x\)
+  - move 2: \(+y\)
+  - move 3: \(+x\)
+  - move 4: \(+y\), etc.
+
+Determine the minimum number of moves needed for Freya to land exactly at \((x,y)\).
+
+**Input Format**
+- The first line contains an integer \(t\) \((1 \le t \le 10^4)\), the number of test cases.
+- Each test case contains three integers \(x\), \(y\), and \(k\) \((0 \le x,y \le 10^9,\ 1 \le k \le 10^9)\).
+
+**Output Format**
+For each test case, output the minimum number of moves Freya needs, on its own line.
+
+**Examples**
+Sample Input 1:
+```
+3
+9 11 3
+0 10 8
+1000000 100000 10
+```
+
+Sample Output 1:
+```
+8
+4
+199999
+```
+
+**Editorial**
+Consider the movements along the \(x\) and \(y\) directions separately.
+
+On an \(x\)-facing move, Freya can increase \(x\) by at most \(k\). Therefore, the minimum number of \(x\)-moves needed is:
+\[
+a = \left\lceil \frac{x}{k} \right\rceil
+\]
+Similarly, the minimum number of \(y\)-moves needed is:
+\[
+b = \left\lceil \frac{y}{k} \right\rceil
+\]
+
+Now we combine them with the alternating rule:
+
+- If \(b \ge a\):  
+  We need at least \(b\) moves facing \(+y\). Since every \(y\)-move is the 2nd, 4th, 6th, ... move, reaching \(b\) \(y\)-moves requires exactly \(2b\) total moves.  
+  Any “extra” \(x\)-moves among those can be made with \(d=0\).
+
+- If \(a > b\):  
+  We need at least \(a\) moves facing \(+x\). The key detail is that Freya starts with an \(x\)-move, so she can finish on an \(x\)-move without needing a final \(y\)-move.  
+  To get \(a\) \(x\)-moves, we need \(2a-1\) total moves.  
+  Any missing \(y\)-progress can be handled by choosing \(d=0\) on some \(y\)-moves.
+
+So the answer is:
+\[
+\text{ans} =
+\begin{cases}
+2b, & b \ge a \\
+2a-1, & a > b
+\end{cases}
+\]
+This can also be written as:
+\[
+\text{ans} = \max(2a-1,\ 2b)
+\]
+where \(a=\left\lceil \frac{x}{k} \right\rceil\) and \(b=\left\lceil \frac{y}{k} \right\rceil\).
+
+Each test case is solved in \(O(1)\) time.
+
+**Code**
+```python
+import sys
+
+def ceil_div(a: int, b: int) -> int:
+    return (a + b - 1) // b
+
+def solve() -> None:
+    data = sys.stdin.read().strip().split()
+    t = int(data[0])
+    idx = 1
+    out = []
+    for _ in range(t):
+        x = int(data[idx]); y = int(data[idx + 1]); k = int(data[idx + 2])
+        idx += 3
+
+        a = ceil_div(x, k)  # required x-direction moves
+        b = ceil_div(y, k)  # required y-direction moves
+
+        out.append(str(max(2 * a - 1, 2 * b)))
+    sys.stdout.write("\n".join(out))
+
+if __name__ == "__main__":
+    solve()
+```

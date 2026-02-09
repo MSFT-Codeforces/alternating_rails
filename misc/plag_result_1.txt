@@ -1,0 +1,2 @@
+- Codeforces — **2147A: Shortest Increasing Path** — `https://codeforces.com/contest/2147/problem/A` ([codeforces.com](https://codeforces.com/contest/2147/problem/A?utm_source=openai))  
+- LeetCode — **754: Reach a Number** — `https://leetcode.com/problems/reach-a-number/` ([ddkk.com](https://ddkk.com/zhuanlan/leetcode/750-799/754.html?utm_source=openai))

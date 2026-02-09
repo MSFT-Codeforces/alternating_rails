@@ -1,0 +1,223 @@
+## Problem: The Clockwork Courier’s Alternating Rails
+
+In an enormous clockwork warehouse, a tiny courier bot starts at bay **(0, 0)** and must deliver a micro‑package to bay **(X, Y)** on a 2D grid.
+
+The warehouse has two one‑way rails:
+
+- On **odd-numbered ticks** (1st, 3rd, 5th, …) the bot can move only **east** (increasing the X coordinate).
+- On **even-numbered ticks** (2nd, 4th, 6th, …) the bot can move only **north** (increasing the Y coordinate).
+
+The bot’s motor “warms up” over time, but there is also a global limiter **K**.
+
+On tick **i**, it may choose an **integer** distance \(d\) such that:
+
+\[
+0 \le d \le \min(K, i)
+\]
+
+and move exactly \(d\) along the allowed rail for that tick.
+
+Your task: for each test case, compute the **minimum number of ticks** needed to land **exactly** on \((X, Y)\).
+
+---
+
+### Input Format
+- First line: integer \(t\) — number of test cases \((1 \le t \le 10^4)\)
+- Each test case: three integers \(X, Y, K\)
+  - \(0 \le X, Y \le 10^{18}\)
+  - \(1 \le K \le 10^{9}\)
+
+### Output Format
+For each test case, output one integer: the minimum number of ticks required.
+
+---
+
+### Sample Input
+```
+4
+0 0 5
+3 2 10
+10 0 3
+5 5 2
+```
+
+### Sample Output
+```
+0
+3
+7
+6
+```
+
+---
+
+## Editorial
+
+### Key observation: X and Y are controlled by different ticks
+Odd ticks affect **only X**, even ticks affect **only Y**.  
+So if we decide to use exactly \(n\) ticks:
+
+- Number of odd ticks:
+\[
+m_x = \left\lceil \frac{n}{2}\right\rceil = \frac{n+1}{2}
+\]
+- Number of even ticks:
+\[
+m_y = \left\lfloor \frac{n}{2}\right\rfloor = \frac{n}{2}
+\]
+
+Define the *maximum* total distance possible along each axis within \(n\) ticks:
+
+\[
+C_x(n)=\sum_{\substack{1\le i\le n \\ i\ \text{odd}}}\min(K,i), \quad
+C_y(n)=\sum_{\substack{1\le i\le n \\ i\ \text{even}}}\min(K,i)
+\]
+
+---
+
+### Why “maximum capacity” is enough (no gaps)
+For one axis, suppose you have several moves where move \(j\) lets you add any integer in \([0, c_j]\).  
+Then all integers from \(0\) to \(\sum c_j\) are achievable.
+
+Reason (induction sketch): if after some moves you can make any sum in \([0,S]\), then adding a new move allowing \([0,c]\) lets you make any sum in \([0,S+c]\) by choosing an old sum \(s\in[0,S]\) and adding \(t-s\in[0,c]\).
+
+So for a fixed \(n\), reaching exactly \((X,Y)\) is possible **iff**
+\[
+C_x(n)\ge X \quad \text{and} \quad C_y(n)\ge Y
+\]
+(odd/even choices are independent).
+
+This gives a monotone feasibility test in \(n\).
+
+---
+
+### Computing \(C_x(n)\) and \(C_y(n)\) in \(O(1)\)
+
+#### 1) Odd ticks capacity \(C_x(n)\)
+Odd tick indices are \(1,3,5,\dots,2m_x-1\).
+
+Among these, those \(\le K\) still grow with the tick index; afterwards they are capped at \(K\).
+
+Count of odd numbers \(\le K\):
+\[
+\left\lfloor \frac{K+1}{2}\right\rfloor
+\]
+Let
+\[
+p_x = \min\left(m_x, \left\lfloor \frac{K+1}{2}\right\rfloor\right)
+\]
+First \(p_x\) odd caps are \(1,3,\dots,2p_x-1\), whose sum is:
+\[
+1+3+\cdots+(2p_x-1)=p_x^2
+\]
+Remaining \(m_x-p_x\) odd ticks contribute \(K\) each.
+
+So:
+\[
+C_x(n)=p_x^2+(m_x-p_x)\cdot K
+\]
+
+#### 2) Even ticks capacity \(C_y(n)\)
+Even indices are \(2,4,6,\dots,2m_y\).
+
+Count of even numbers \(\le K\):
+\[
+\left\lfloor \frac{K}{2}\right\rfloor
+\]
+Let
+\[
+p_y = \min\left(m_y, \left\lfloor \frac{K}{2}\right\rfloor\right)
+\]
+First \(p_y\) even caps are \(2,4,\dots,2p_y\), sum:
+\[
+2+4+\cdots+2p_y = p_y(p_y+1)
+\]
+Remaining contribute \(K\) each:
+\[
+C_y(n)=p_y(p_y+1)+(m_y-p_y)\cdot K
+\]
+
+Use 128-bit integers for safety.
+
+---
+
+### Finding the minimum \(n\)
+Feasibility is monotone: if you can reach with \(n\) ticks, you can with any larger number (just add zero moves).
+
+Algorithm per test:
+1. If \((X,Y)=(0,0)\), answer is 0.
+2. Exponentially increase \(hi\) (1,2,4,8,…) until feasible.
+3. Binary search the smallest feasible \(n\) in \([0, hi]\).
+
+Time: \(O(\log n)\) per test case (fast enough for \(10^4\)).
+
+---
+
+## C++17 Reference Implementation
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+using i128 = __int128_t;
+
+// Maximum east (X) distance achievable in n ticks
+static inline i128 capX(long long n, long long K) {
+    long long mx = (n + 1) / 2;          // odd ticks count
+    long long warmOdd = (K + 1) / 2;     // number of odd indices <= K
+    long long px = min(mx, warmOdd);
+
+    // 1 + 3 + ... + (2*px-1) = px^2
+    i128 res = (i128)px * (i128)px;
+    res += (i128)(mx - px) * (i128)K;
+    return res;
+}
+
+// Maximum north (Y) distance achievable in n ticks
+static inline i128 capY(long long n, long long K) {
+    long long my = n / 2;                // even ticks count
+    long long warmEven = K / 2;          // number of even indices <= K
+    long long py = min(my, warmEven);
+
+    // 2 + 4 + ... + 2*py = py*(py+1)
+    i128 res = (i128)py * (i128)(py + 1);
+    res += (i128)(my - py) * (i128)K;
+    return res;
+}
+
+static inline bool feasible(long long n, long long X, long long Y, long long K) {
+    return capX(n, K) >= (i128)X && capY(n, K) >= (i128)Y;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+    cin >> t;
+    while (t--) {
+        long long X, Y, K;
+        cin >> X >> Y >> K;
+
+        if (X == 0 && Y == 0) {
+            cout << 0 << "\n";
+            continue;
+        }
+
+        long long lo = 0, hi = 1;
+        while (!feasible(hi, X, Y, K)) {
+            hi <<= 1;
+        }
+
+        while (lo + 1 < hi) {
+            long long mid = lo + (hi - lo) / 2;
+            if (feasible(mid, X, Y, K)) hi = mid;
+            else lo = mid;
+        }
+
+        cout << hi << "\n";
+    }
+    return 0;
+}
+```
+

@@ -1,0 +1,9 @@
+- **AtCoder Beginner Contest 326 (Panasonic Programming Contest 2023) — F: Robot Rotation** ([atcoder.jp](https://atcoder.jp/contests/abc326/tasks/abc326_f))  
+```text
+https://atcoder.jp/contests/abc326/tasks/abc326_f
+```
+
+- **GeeksforGeeks — Check if the player can reach the target co-ordinates after performing given moves from origin** ([geeksforgeeks.org](https://www.geeksforgeeks.org/dsa/check-if-the-player-can-reach-the-target-co-ordinates-after-performing-given-moves-from-origin/?utm_source=openai))  
+```text
+https://www.geeksforgeeks.org/dsa/check-if-the-player-can-reach-the-target-co-ordinates-after-performing-given-moves-from-origin/
+```
