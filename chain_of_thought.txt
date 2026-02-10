@@ -1,47 +1,38 @@
 **[section_01]**
 Interpreting the movement rules and the required output.
-
 **[atomic_01_01]**
 The robot starts at the origin $(0, 0)$ and must reach exactly the target point $(X, Y)$. The answer for each test case is the minimum number of ticks needed to land on that exact coordinate pair, not just pass through it.
-
 **[atomic_01_02]**
 Time is discrete and starts at tick $i = 1$. Tick parity determines direction:
 - If $i$ is odd, movement is allowed only along the $X$ axis in the positive direction (east).
 - If $i$ is even, movement is allowed only along the $Y$ axis in the positive direction (north).
 No tick ever allows decreasing a coordinate.
-
 **[atomic_01_03]**
 On tick $i$, the robot selects an integer distance $d$ satisfying:
 $$
 0 \le d \le \min(K, i)
 $$
 The robot then moves exactly $d$ units along the only allowed axis for that tick. The upper bound depends on both a global cap $K$ and the warm-up factor $i$.
-
 **[atomic_01_04]**
 Choosing $d = 0$ is explicitly allowed. This means a tick can be “spent” without changing position, which matters because sometimes one axis needs more opportunities than the other.
-
 **[atomic_01_05]**
 The input contains $t$ independent test cases. Each test case provides $(X, Y, K)$, and we must output one integer per case. If $(X, Y) = (0, 0)$, the robot is already at the target, so the minimum ticks is $0$.
 
+---
 
 **[section_02]**
 Enumerating edge cases and test scenarios to validate correctness.
-
 **[atomic_02_01]**
 The zero target case $(X, Y) = (0, 0)$ is a must-test because it should return $0$ ticks without performing any movement logic. This ensures that “no ticks” is a valid plan.
-
 **[atomic_02_02]**
 Single-axis targets highlight alternating directions:
 - $(X, 0)$ requires progress only on odd ticks and must tolerate even ticks with $d = 0$.
 - $(0, Y)$ requires progress only on even ticks and must tolerate odd ticks with $d = 0$.
 These cases ensure the algorithm does not incorrectly assume both axes must increase frequently.
-
 **[atomic_02_03]**
 Very small $K$ (such as $K = 1$) causes slow growth and can force a large tick count even for moderate $X$ or $Y$. This stresses correctness when many ticks are required and helps expose off-by-one errors in counting odd/even ticks.
-
 **[atomic_02_04]**
 Very large $K$ (much larger than any tick index reached) effectively makes the bound $d \le i$ dominate. This checks whether the warm-up behavior is handled correctly when the global cap does not bind.
-
 **[atomic_02_05]**
 Parity boundaries matter because after $n$ ticks the number of odd and even opportunities differs:
 $$
@@ -49,55 +40,45 @@ m_x = \left\lceil \frac{n}{2} \right\rceil,\quad
 m_y = \left\lfloor \frac{n}{2} \right\rfloor
 $$
 Test cases where the answer is exactly an odd $n$ versus exactly an even $n$ help validate rounding logic.
-
 **[atomic_02_06]**
 Extremal values $X, Y \le 10^{18}$ combined with up to $10^4$ test cases require careful handling of large arithmetic and consistent performance across many cases. This is also where integer overflow would occur in fixed-width integer languages.
 
+---
 
 **[section_03]**
 Trying exhaustive tick-by-tick enumeration to find the earliest reachable time.
-
 **[atomic_03_01]**
 A first naive attempt is to enumerate decisions tick by tick. For tick $i$, enumerate all integer distances $d \in [0, \min(K, i)]$, apply the move to the appropriate axis (odd to $X$, even to $Y$), and continue exploring until the target is found.
-
 **[atomic_03_02]**
 This can be framed as searching a tree of possibilities where the depth is the number of ticks and each node branches into up to $\min(K, i) + 1$ children. The goal is to find the minimum depth at which $(X, Y)$ appears.
-
 **[atomic_03_03]**
 Even if we cap exploration by increasing the tick limit gradually, the number of distinct action sequences grows explosively. In the worst case, the branching factor quickly approaches $K + 1$, so the number of sequences after $n$ ticks is on the order of $\prod_{i=1}^n (\min(K, i) + 1)$.
-
 **[atomic_03_04]**
 The time complexity is exponential in $n$ (and also heavily dependent on $K$), and memory can also blow up if we attempt to store visited states. With $X, Y$ up to $10^{18}$, the required $n$ can be huge, making this approach infeasible.
-
 **[atomic_03_05]**
 Because this approach cannot scale even to moderate answers, the next refinement must avoid exploring individual move choices and instead reason about reachability more compactly.
 
+---
 
 **[section_04]**
 Reducing the search to per-axis dynamic programming and observing why it still fails.
-
 **[atomic_04_01]**
 A more structured idea is to exploit the separation of axes: odd ticks only contribute to $X$, and even ticks only contribute to $Y$. For a fixed number of ticks $n$, we can treat the $X$ and $Y$ requirements as independent 1D reachability questions.
-
 **[atomic_04_02]**
 For the odd ticks, we have a sequence of moves where each move allows adding any integer in an interval $[0, c_j]$ (with $c_j = \min(K, i_j)$ for odd tick indices $i_j$). A natural attempt is a knapsack-like DP over reachable sums for $X$ after $m_x$ odd moves, and similarly for $Y$ after $m_y$ even moves.
-
 **[atomic_04_03]**
 This DP is pseudo-polynomial: even with optimizations like bitsets, it scales roughly with the magnitude of the target values (up to $X$ for the odd DP and up to $Y$ for the even DP). Time complexity becomes on the order of $O(m_x \cdot X)$ and $O(m_y \cdot Y)$ in a straightforward formulation, with similarly prohibitive memory.
-
 **[atomic_04_04]**
 Since $X$ and $Y$ can be as large as $10^{18}$, any DP that has a dimension proportional to $X$ or $Y$ is infeasible. In terms of input size (which is $O(\log X + \log Y)$ bits), this pseudo-polynomial DP is effectively exponential.
-
 **[atomic_04_05]**
 This failure suggests we should stop tracking exact reachable sums and instead look for a criterion that can be computed using only arithmetic on $n$ and $K$.
 
+---
 
 **[section_05]**
 Using monotonicity with a linear-time feasibility check and identifying the bottleneck.
-
 **[atomic_05_01]**
 A new direction is to define a feasibility test for a given tick budget $n$: decide whether the robot can reach $(X, Y)$ in at most $n$ ticks. If such a predicate is monotone (false for small $n$, true for large $n$), we can search for the minimum feasible $n$.
-
 **[atomic_05_02]**
 For a fixed $n$, compute the maximum possible contribution along each axis by always taking the maximum allowed distance on the ticks affecting that axis:
 $$
@@ -105,20 +86,17 @@ C_x(n)=\sum_{\substack{1\le i\le n \\ i\ \text{odd}}}\min(K,i),\quad
 C_y(n)=\sum_{\substack{1\le i\le n \\ i\ \text{even}}}\min(K,i)
 $$
 A feasibility check can then compare whether these maxima are at least $X$ and $Y$.
-
 **[atomic_05_03]**
 A direct implementation computes $C_x(n)$ and $C_y(n)$ by looping through ticks $1$ to $n$ and adding $\min(K, i)$ to the appropriate sum based on parity. This makes one feasibility check cost $O(n)$ time and $O(1)$ space.
-
 **[atomic_05_04]**
 Given monotonicity, we can apply binary search on $n$, but each predicate evaluation still costs $O(n)$. The resulting complexity becomes $O(n \log n)$ per test case in the scale of the searched range, which is far too slow when the answer can be extremely large.
-
 **[atomic_05_05]**
 The bottleneck is the linear scan inside the feasibility check. To improve further, we need an $O(1)$ way to compute $C_x(n)$ and $C_y(n)$ without iterating through all ticks.
 
+---
 
 **[section_06]**
 Deriving closed-form capacities and enabling fast binary search.
-
 **[atomic_06_01]**
 The first step is to count how many odd and even ticks occur within $n$ ticks:
 $$
@@ -126,7 +104,6 @@ m_x = \left\lceil \frac{n}{2} \right\rceil = \frac{n+1}{2},\quad
 m_y = \left\lfloor \frac{n}{2} \right\rfloor = \frac{n}{2}
 $$
 Odd ticks correspond to $m_x$ opportunities to add to $X$, and even ticks correspond to $m_y$ opportunities to add to $Y$.
-
 **[atomic_06_02]**
 For odd ticks, the indices are $1, 3, 5, \dots, 2m_x-1$. The value added on odd tick index $i$ is at most $\min(K, i)$. The odd indices that are still in “warm-up” (not capped by $K$) are those odd $i \le K$, whose count is:
 $$
@@ -144,7 +121,6 @@ and the remaining $(m_x - p_x)$ odd ticks contribute $K$ each, giving:
 $$
 C_x(n)=p_x^2+(m_x-p_x)\cdot K
 $$
-
 **[atomic_06_03]**
 For even ticks, the indices are $2, 4, 6, \dots, 2m_y$. The even indices in warm-up satisfy $2j \le K$, so the count is:
 $$
@@ -162,45 +138,39 @@ and the remaining contribute $K$ each:
 $$
 C_y(n)=p_y(p_y+1)+(m_y-p_y)\cdot K
 $$
-
 **[atomic_06_04]**
 We also need to justify that having enough maximum capacity implies exact reachability, not just “overshooting possible”. For a single axis, if moves allow adding any integer in $[0, c_1], [0, c_2], \dots, [0, c_m]$, then every integer in $[0, \sum c_j]$ is achievable. This can be shown by induction: adding a new interval $[0, c]$ extends the reachable set from $[0, S]$ to $[0, S+c]$ with no gaps. Therefore, within $n$ ticks, reaching $(X, Y)$ is possible if and only if:
 $$
 C_x(n)\ge X\quad \text{and}\quad C_y(n)\ge Y
 $$
-
 **[atomic_06_05]**
 The feasibility predicate is now $O(1)$ arithmetic. Since feasibility is monotone in $n$ (extra ticks can be used with $d=0$), we can find the minimum $n$ by:
 1. Doubling an upper bound $hi$ until feasible.
 2. Binary searching the smallest feasible $n$ in $[0, hi]$.
 This yields per-test complexity $O(\log n^\*)$ time and $O(1)$ extra space, where $n^\*$ is the minimal answer, strictly improving over the prior $O(n \log n)$ feasibility approach.
 
+---
 
 **[section_07]**
 Finalizing a robust implementation plan and validating constraints compliance.
-
 **[atomic_07_01]**
 The final solution needs only constant-time helper computations and a logarithmic search. The key implementation checklist is:
 - Correctly compute $m_x, m_y, p_x, p_y$ using integer division.
 - Use the derived formulas for $C_x(n)$ and $C_y(n)$ without iterating ticks.
 - Implement monotone search (doubling + binary search) to avoid needing a fixed upper bound.
-
 **[atomic_07_02]**
 Corner-case handling must include:
 - Returning $0$ when $X = 0$ and $Y = 0$.
 - Ensuring the search interval includes $n = 0$ as a candidate lower bound.
 - Ensuring that doubling cannot loop forever (it will not, because capacities grow unbounded with $n$ when $K \ge 1$ and we can accumulate arbitrarily large distance over enough ticks).
-
 **[atomic_07_03]**
 In Python, integer overflow is not a concern because integers are arbitrary precision. This matches the requirement that the method must safely handle values beyond $10^{18}$ during intermediate multiplication like $p_x^2$.
-
 **[atomic_07_04]**
 Complexity summary (per test case):
 - Feasibility check: $O(1)$ time, $O(1)$ space.
 - Doubling: $O(\log n^\*)$ checks.
 - Binary search: $O(\log n^\*)$ checks.
 Total: $O(\log n^\*)$ time and $O(1)$ additional space, which is appropriate for $t \le 10^4$.
-
 **[atomic_07_05]**
 A Python reference implementation that follows the stated style rules (4-space indentation, standard library only, no global mutable state, type hints without `typing`, and docstrings on the module and functions):
 
