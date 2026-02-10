@@ -7,3 +7,4 @@
 **Number of Approaches:** - 4, ($O\left(\prod_{i=1}^n (\min(K, i)+1)\right)$ -> $O\left(n(X+Y)\right)$ -> $O(n\log n)$ -> $O(\log n)$)
 **Number of Chains:** - 7
 **Model-Breaking:** - False
+**GitHub:** - https://github.com/MSFT-Codeforces/alternating_rails
