@@ -23,7 +23,7 @@ Notes/clarifications:
 - It is guaranteed that reaching any target with $X \ge 0$ and $Y \ge 0$ is always possible for the given constraints, so the answer always exists (you never need to output $-1$).
 
 
-For each test case, determine the minimum number of ticks needed to reach exactly $(X, Y)$. If $(X, Y) = (0, 0)$, the answer is $0$.
+- For every test case, the answer is guaranteed to exist (you never need to output $-1$). Note that there is **no upper bound** on the number of ticks you may take: for any fixed $n$, the maximum reachable distance is finite (indeed it is $O(n)$ when $K$ is constant, e.g. $K=1$), but as $n \to \infty$ the maximum reachable distances along both axes grow without bound. In particular, after $n$ ticks the reachable $X$ values form a contiguous range $[0, C_x(n)]$ where $C_x(n)=\sum_{1\le i\le n,\ i\ \text{odd}}\min(K,i)$, and similarly $Y \in [0, C_y(n)]$ where $C_y(n)=\sum_{1\le i\le n,\ i\ \text{even}}\min(K,i)$. Since $K \ge 1$, both $C_x(n)$ and $C_y(n)$ increase without bound with $n$, so every finite target $(X,Y)$ with $X\ge 0, Y\ge 0$ is reachable for sufficiently large $n$ (for example, with $K=1$ you can reach $X=10^{18}$ by taking $d=1$ on $10^{18}$ odd ticks, which requires about $2\cdot 10^{18}$ total ticks).
 
 **Input Format:-**
 
