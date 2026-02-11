@@ -21,9 +21,9 @@ The input contains $t$ independent test cases. Each test case provides $(X, Y, K
 ---
 
 **[section_02]**
-Enumerating edge cases and test scenarios to validate correctness.
+Explaining the provided sample test cases (and then listing additional edge cases).
 **[atomic_02_01]**
-The zero target case $(X, Y) = (0, 0)$ is a must-test because it should return $0$ ticks without performing any movement logic. This ensures that “no ticks” is a valid plan.
+This section should cover two things: (1) walk through the official sample inputs/outputs from the statement with concrete move sequences and “why minimal” arguments, and (2) list extra edge cases worth testing beyond the samples.
 **[atomic_02_02]**
 Single-axis targets highlight alternating directions:
 - $(X, 0)$ requires progress only on odd ticks and must tolerate even ticks with $d = 0$.
