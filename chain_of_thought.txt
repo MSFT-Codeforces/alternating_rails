@@ -139,7 +139,7 @@ The bottleneck is the linear scan inside the feasibility check. To improve furth
 ---
 
 **[section_06]**
-Deriving closed-form capacities and enabling fast binary search.
+Derive closed-form capacity formulas.
 **[atomic_06_01]**
 The first step is to count how many odd and even ticks occur within $n$ ticks:
 $$
@@ -195,7 +195,7 @@ This yields per-test complexity $O(\log n^\*)$ time and $O(1)$ extra space, wher
 ---
 
 **[section_07]**
-Finalizing a robust implementation plan and validating constraints compliance.
+Validate and implement the approach.
 **[atomic_07_01]**
 The final solution needs only constant-time helper computations and a logarithmic search. The key implementation checklist is:
 - Correctly compute $m_x, m_y, p_x, p_y$ using integer division.

@@ -17,7 +17,7 @@ and moves exactly $d$ in the allowed direction for that tick.
 
 Notes/clarifications:
 
-- The robot’s position is considered only **after completing** whole ticks. The answer is the smallest integer $n$ such that after finishing tick $n$, the robot is exactly at $(X, Y)$.
+- The robot’s position is considered only **after completing** whole ticks. The answer is the smallest integer $n \ge 0$ such that after finishing tick $n$, the robot is exactly at $(X, Y)$. In particular, $n = 0$ (taking no ticks) is allowed and corresponds to staying at the start $(0,0)$.
 - During a tick, the robot cannot “stop early” after moving fewer than $d$ units; it must move exactly the chosen $d$.
 - Choosing $d = 0$ is allowed (the robot may stay in place for that tick).
 - The answer is guaranteed to exist for every test case (you never need to output $-1$). There is **no upper bound** on the number of ticks you may take. For a fixed $n$, define
