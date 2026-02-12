@@ -20,12 +20,17 @@ Notes/clarifications:
 - The robot’s position is considered only **after completing** whole ticks. The answer is the smallest integer $n \ge 0$ such that after finishing tick $n$, the robot is exactly at $(X, Y)$. In particular, $n = 0$ (taking no ticks) is allowed and corresponds to staying at the start $(0,0)$.
 - During a tick, the robot cannot “stop early” after moving fewer than $d$ units; it must move exactly the chosen $d$.
 - Choosing $d = 0$ is allowed (the robot may stay in place for that tick).
-- The answer is guaranteed to exist for every test case (you never need to output $-1$). There is **no upper bound** on the number of ticks you may take. For a fixed $n$, define
-  $$
-  C_x(n)=\sum_{\substack{1\le i\le n\\ i\ \text{odd}}}\min(K,i),\qquad
-  C_y(n)=\sum_{\substack{1\le i\le n\\ i\ \text{even}}}\min(K,i).
-  $$
-  After $n$ ticks, the set of achievable $X$ values is exactly the full integer interval $[0,C_x(n)]$ (and similarly $Y \in [0,C_y(n)]$): this is because each contributing tick lets you add any integer in an interval $[0,c]$, and sums of such intervals are gapless (induction: if $[0,S]$ is reachable, then after one more tick with $[0,c]$, every value in $[0,S+c]$ is reachable as $u+v$ with $u\in[0,S], v\in[0,c]$). Since $K\ge 1$, both $C_x(n)$ and $C_y(n)$ grow without bound as $n\to\infty$, so for any finite target $(X,Y)$ with $X\ge 0, Y\ge 0$, there exists some $n$ with $C_x(n)\ge X$ and $C_y(n)\ge Y$, hence $(X,Y)$ is reachable **exactly**.
+- The answer is guaranteed to exist for every test case (you never need to output $-1$). There is **no upper bound** on the number of ticks you may take.
+
+For a fixed $n$, define:
+
+$$
+C_x(n)=\sum_{\substack{1\le i\le n\\ i\ \text{odd}}}\min(K,i),\qquad
+C_y(n)=\sum_{\substack{1\le i\le n\\ i\ \text{even}}}\min(K,i).
+$$
+
+After $n$ ticks, the set of achievable $X$ values is exactly the full integer interval $[0,C_x(n)]$ (and similarly $Y \in [0,C_y(n)]$): this is because each contributing tick lets you add any integer in an interval $[0,c]$, and sums of such intervals are gapless (induction: if $[0,S]$ is reachable, then after one more tick with $[0,c]$, every value in $[0,S+c]$ is reachable as $u+v$ with $u\in[0,S], v\in[0,c]$). Since $K\ge 1$, both $C_x(n)$ and $C_y(n)$ grow without bound as $n\to\infty$, so for any finite target $(X,Y)$ with $X\ge 0, Y\ge 0$, there exists some $n$ with $C_x(n)\ge X$ and $C_y(n)\ge Y$, hence $(X,Y)$ is reachable **exactly**.
+
 
 **Input Format:-**
 
