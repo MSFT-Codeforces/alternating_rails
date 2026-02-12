@@ -190,7 +190,7 @@ $$
 The feasibility predicate is now $O(1)$ arithmetic. Since feasibility is monotone in $n$ (extra ticks can be used with $d=0$), we can find the minimum $n$ by:
 1. Doubling an upper bound $hi$ until feasible.
 2. Binary searching the smallest feasible $n$ in $[0, hi]$.
-This yields per-test complexity $O(\log n^\*)$ time and $O(1)$ extra space, where $n^\*$ is the minimal answer, strictly improving over the prior $O(n \log n)$ feasibility approach.
+This yields per-test complexity $O(\log n^*)$ time and $O(1)$ extra space, where $n^*$ is the minimal answer, strictly improving over the prior $O(n \log n)$ feasibility approach.
 
 ---
 
@@ -211,8 +211,8 @@ In Python, integer overflow is not a concern because integers are arbitrary prec
 **[atomic_07_04]**
 Complexity summary (per test case):
 - Feasibility check: $O(1)$ time, $O(1)$ space.
-- Doubling: $O(\log n^\*)$ checks.
-- Binary search: $O(\log n^\*)$ checks.
-Total: $O(\log n^\*)$ time and $O(1)$ additional space, which is appropriate for $t \le 10^4$.
+- Doubling: $O(\log n^*)$ checks.
+- Binary search: $O(\log n^*)$ checks.
+Total: $O(\log n^*)$ time and $O(1)$ additional space, which is appropriate for $t \le 10^4$.
 **[atomic_07_05]**
 A Python reference implementation that follows the stated style rules (4-space indentation, standard library only, no global mutable state, type hints without `typing`, and docstrings on the module and functions):
