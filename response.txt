@@ -259,10 +259,10 @@ smallest feasible tick count.
 For each test case:
 
 - Each feasibility check is $O(1)$ time.
-- The doubling phase takes $O(\log n^\*)$ checks.
-- The binary search takes $O(\log n^\*)$ checks.
+- The doubling phase takes $O(\log n^*)$ checks.
+- The binary search takes $O(\log n^*)$ checks.
 
-Total time: $O(\log n^\*)$ per test case, where $n^\*$ is the minimum answer.  
+Total time: $O(\log n^*)$ per test case, where $n^*$ is the minimum answer.  
 Extra space: $O(1)$ aside from input reading and the output list.
 
 **6. Conclusion**
